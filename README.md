@@ -1,4 +1,4 @@
-# first-shiny-app
+# first-shiny-app / Chinguun Finance
 Энэхүү R shiny вэб аппликейшн нь танд санхүү, эдийн засгийн мэдээлэл болон тооцооллуудыг гаргаж өгхөд зориулагдав. 
 
 "Chinguun_Finance.R" нэртэй файл нь R shiny дахь гол вэб аппликейшн нь юм. 
