@@ -5,3 +5,7 @@
 Бусад файлууд нь дээрх файлийг дэмжсэн туслах файлууд болно. 
 
 https://chinguun0619.shinyapps.io/first-shiny-app/?_ga=2.171084704.126932094.1676011712-2020789355.1674204374
+
+This R shiny web application is designed to provide you with financial and economic data and calculations.
+
+The file named "Chinguun_Finance.R" is the main web application in R shiny. Other files are support files that support the above file.
