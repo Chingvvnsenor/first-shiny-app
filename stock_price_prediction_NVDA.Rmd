@@ -1,0 +1,116 @@
+---
+title: "stock_price_prediction_NVDA"
+author: "Chinguun"
+date: "`r Sys.Date()`"
+output:
+  html_document: default
+  pdf_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## NVIDIA Corp хувьцааны үнийг таамаглах нь
+
+quantmod, tseries, timeSeries, forecast зэрэг сангуудыг ашиглан дурын хувьцаанд /энэ жишээнд NVIDIA компаний хувьцааг авав/ хугацааны цуваан өгөгдлийг ашиглан ирээдүйн ханшид анализ, шинжилгээ хийцгээе. 
+
+
+```{r}
+##Importing Required Packages буюу хэрэгцээт санг дуудна
+library(quantmod)
+library(tseries)
+library(timeSeries)
+library(forecast)
+```
+
+#### Санхүүгийн вэбсайтаас /yahooFinance/ өгөгдлийг дуудна
+
+```{r}
+##Importing Dataset from Finance Websites...(Default yahoo)
+getSymbols('NVDA', from = '2022-01-01', to = '2023-01-01')
+View(NVDA)
+```
+
+#### Ханшийн түүхэн өгөгдлийг графикаар илэрхийлье
+
+```{r}
+#class(NVDA)
+
+chartSeries(NVDA, subset = 'last 9 months', type = 'auto')
+addBBands()
+```
+
+#### Өгөгдөл доторх багануудад утга оноож тус бүрд плот үүсгэе. 
+
+```{r}
+##Assigning columns of dataset  
+Open_prices = NVDA[,1]
+High_prices = NVDA[,2]
+Low_prices = NVDA[,3]
+Close_prices = NVDA[, 4]
+Volume_prices = NVDA[,5]
+Adjusted_prices = NVDA[,6]
+
+par(mfrow = c(2,3))
+
+plot(Open_prices, main = 'Opening Price of Stocks')
+plot(High_prices, main = 'Highest Price of Stocks')
+plot(Low_prices, main = 'Lowest Price of Stocks')
+plot(Close_prices, main = 'Closing Price of Stocks')
+plot(Volume_prices, main = 'Volume of Stocks')
+plot(Adjusted_prices, main = 'Adjusted Price of Stocks')
+
+Predic_Price = Adjusted_prices
+```
+
+#### Үнийг таамаглах нь
+
+```{r}
+#class(Predic_Price)
+
+######## Finding the Linear Relation between observations ########
+
+par(mfrow = c(1,2))
+Acf(Predic_Price, main = 'ACF for differenced Series')
+Pacf(Predic_Price, main = 'PACF for differenced Series ', col = '#cc0000')
+Auto_cf = Acf(Predic_Price, plot = FALSE)
+Auto_cf
+PAuto_cf = Pacf(Predic_Price, plot = FALSE)
+PAuto_cf
+
+print(adf.test(Predic_Price))
+```
+
+#### Өгөөжийн таамаглал
+
+```{r}
+################### Prediction of Return #######################
+
+return_NVDA <- 100*diff(log(Predic_Price))
+
+NVDA_return_train <- return_NVDA[1:(0.9*length(return_NVDA))]
+
+NVDA_return_test <- return_NVDA[(0.9*length(return_NVDA)+1):length(return_NVDA)]
+
+auto.arima(NVDA_return_train, seasonal = FALSE)
+
+fit <- Arima(NVDA_return_train, order = c(1,0,0))
+
+preds <- predict(fit, n.ahead = (length(return_NVDA) - (0.9*length(return_NVDA))))$pred
+preds
+```
+
+#### Урьдчилан таамагласан үр дүн
+
+```{r}
+################## Forecasting Predicted Result ##################
+
+test_forecast <- forecast(fit,h = 15)
+test_forecast
+
+par(mfrow = c(1,1))
+plot(test_forecast, main = "Arima forecast for Nividia Stock")
+
+  accuracy(preds, NVDA_return_test)
+```
